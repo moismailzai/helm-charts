@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    caddy: {{ .Values.caddyEnvHost }}
+    caddy.@gluetun_httpproxy.0_host: {{ .Values.glueTunEnvHttpProxyHost }}
+    caddy.@gluetun_shadowsocks.0_host: {{ .Values.glueTunEnvShadowSocksHost }}
+    caddy.@plex.0_host: {{ .Values.plexEnvHost }}
+    caddy.@qbittorrent.0_host: {{ .Values.qBittorrentEnvHost }}
+    caddy.@xteve.0_host: {{ .Values.xteveEnvHost }}
+    caddy.0_reverse_proxy: '@gluetun_httpproxy {{ .Values.glueTunReverseProxyHost }}:8888'
+    caddy.1_reverse_proxy: '@gluetun_shadowsocks {{ .Values.glueTunReverseProxyHost }}:8388'
+    caddy.2_reverse_proxy: '@plex {{ .Values.plexEnvHostIp }}:32400'
+    caddy.3_reverse_proxy: '@qbittorrent {{ .Values.glueTunReverseProxyHost }}:8080'
+    caddy.4_reverse_proxy: '@xteve {{ .Values.glueTunReverseProxyHost }}:34400'
+  labels:
+    io.kompose.service: gluetun
+  name: gluetun
+spec:
+  ports:
+    - name: "8000"
+      port: 8000
+      targetPort: 8000
+    - name: "8080"
+      port: 8080
+      targetPort: 8080
+    - name: "8388"
+      port: 8388
+      targetPort: 8388
+    - name: 8388-udp
+      port: 8388
+      protocol: UDP
+      targetPort: 8388
+    - name: "8888"
+      port: 8888
+      targetPort: 8888
+    - name: "34400"
+      port: 34400
+      targetPort: 34400
+  selector:
+    io.kompose.service: gluetun

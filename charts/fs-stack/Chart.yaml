@@ -1,0 +1,8 @@
+apiVersion: v2
+name: fs-stack
+version: 0.0.1
+description: See https://helm.sh/docs/topics/charts/
+keywords:
+  - fs-stack
+sources:
+  - https://github.com/moismailzai/nas1-portainer-stack-main

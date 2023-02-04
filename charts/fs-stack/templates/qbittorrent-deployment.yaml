@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    autoheal: "true"
+  labels:
+    io.kompose.service: qbittorrent
+  name: qbittorrent
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: qbittorrent
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        autoheal: "true"
+      labels:
+        io.kompose.service: qbittorrent
+    spec:
+      containers:
+        - env:
+            - name: TZ
+              value: {{ .Values.envTimeZone }}
+          image: linuxserver/qbittorrent
+          livenessProbe:
+            exec:
+              command:
+                -  {{ .Values.livenessProbeCommand }}
+                - {{ .Values.livenessProbeUrl }}
+            failureThreshold: 1
+            periodSeconds: {{ .Values.livenessProbePeriodSeconds }}
+            timeoutSeconds: {{ .Values.livenessProbeTimeoutSeconds }}
+          name: qbittorrent
+          resources: {}
+          volumeMounts:
+            - mountPath: /config
+              name: qbittorrent-vol0
+            - mountPath: /mnt/Public
+              name: qbittorrent-vol1
+      restartPolicy: Always
+      volumes:
+        - name: qbittorrent-vol0
+          nfs:
+            server: {{ .Values.hostNfsServerAddress }}
+            path: {{ .Values.hostBasePersistPath }}/qbittorrent/config
+        - name: qbittorrent-vol1
+          nfs:
+            server: {{ .Values.hostNfsServerAddress }}
+            path: {{ .Values.hostBasePublicPath }}

@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    io.kompose.service: autoheal
+  name: autoheal
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: autoheal
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        io.kompose.service: autoheal
+    spec:
+      containers:
+        - env:
+            - name: AUTOHEAL_CONTAINER_LABEL
+              value: autoheal
+            - name: TZ
+              value: {{ .Values.envTimeZone }}
+          image: willfarrell/autoheal
+          name: autoheal
+          resources: {}
+          volumeMounts:
+            - mountPath: /var/run/docker.sock
+              name: autoheal-vol0
+              readOnly: true
+      restartPolicy: Always
+      volumes:
+        - name: autoheal-vol0
+          nfs:
+            server: {{ .Values.hostNfsServerAddress }}
+            path: {{ .Values.hostBasePersistPath }}/sys/var/run/docker.sock
+            readOnly: true

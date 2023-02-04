@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    io.kompose.service: plex
+  name: plex
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: plex
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        io.kompose.service: plex
+    spec:
+      containers:
+        - env:
+{{/*            - name: CUDA_PKG_VERSION*/}}
+{{/*              value: {{ .Values.plexEnvCudaPkgVersion }}*/}}
+{{/*            - name: CUDA_VERSION*/}}
+{{/*              value: {{ .Values.plexEnvCudaVersion }}*/}}
+{{/*            - name: LD_LIBRARY_PATH*/}}
+{{/*              value: {{ .Values.plexEnvLdLibraryPath }}*/}}
+            - name: NVIDIA_DRIVER_CAPABILITIES
+              value: {{ .Values.plexEnvNvidiaDriverCapabilities }}
+{{/*            - name: NVIDIA_REQUIRE_CUDA*/}}
+{{/*              value: {{ .Values.plexEnvNvidiaRequireCuda }}*/}}
+            - name: NVIDIA_VISIBLE_DEVICES
+              value: {{ .Values.plexEnvNvidiaVisibleDevices }}
+            - name: PATH
+              value: {{ .Values.plexEnvPath }}
+            - name: PLEX_CLAIM
+              value: {{ .Values.plexEnvClaim }}
+            - name: TZ
+              value: {{ .Values.envTimeZone }}
+          image: linuxserver/plex
+          name: plex
+          resources: {}
+          volumeMounts:
+            - mountPath: /transcode
+              name: plex-vol0
+            - mountPath: /config
+              name: plex-vol1
+            - mountPath: /movies
+              name: plex-vol2
+            - mountPath: /tv
+              name: plex-vol3
+            - mountPath: /usr/local/nvidia
+              name: plex-vol4
+      restartPolicy: Always
+      volumes:
+        - name: plex-vol0
+          nfs:
+            server: {{ .Values.hostNfsServerAddress }}
+            path: {{ .Values.hostTempPath }}
+        - name: plex-vol1
+          nfs:
+            server: {{ .Values.hostNfsServerAddress }}
+            path: {{ .Values.hostBasePersistPath }}/plex/config
+        - name: plex-vol2
+          nfs:
+            server: {{ .Values.hostNfsServerAddress }}
+            path: {{ .Values.hostBasePublicPath }}/Films
+        - name: plex-vol3
+          nfs:
+            server: {{ .Values.hostNfsServerAddress }}
+            path: {{ .Values.hostBasePublicPath }}/Shows
+        - name: plex-vol4
+          nfs:
+            server: {{ .Values.hostNfsServerAddress }}
+            path:

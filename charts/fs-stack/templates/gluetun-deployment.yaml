@@ -1,0 +1,105 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    caddy: {{ .Values.caddyEnvHost }}
+    caddy.@gluetun_httpproxy.0_host: {{ .Values.glueTunEnvHttpProxyHost }}
+    caddy.@gluetun_shadowsocks.0_host: {{ .Values.glueTunEnvShadowSocksHost }}
+    caddy.@plex.0_host: {{ .Values.plexEnvHost }}
+    caddy.@qbittorrent.0_host: {{ .Values.qBittorrentEnvHost }}
+    caddy.@xteve.0_host: {{ .Values.xteveEnvHost }}
+    caddy.0_reverse_proxy: '@gluetun_httpproxy {{ .Values.glueTunReverseProxyHost }}:8888'
+    caddy.1_reverse_proxy: '@gluetun_shadowsocks {{ .Values.glueTunReverseProxyHost }}:8388'
+    caddy.2_reverse_proxy: '@plex {{ .Values.plexEnvHostIp }}:32400'
+    caddy.3_reverse_proxy: '@qbittorrent {{ .Values.glueTunReverseProxyHost }}:8080'
+    caddy.4_reverse_proxy: '@xteve {{ .Values.glueTunReverseProxyHost }}:34400'
+  labels:
+    io.kompose.service: gluetun
+  name: gluetun
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: gluetun
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        caddy: {{ .Values.caddyEnvHost }}
+        caddy.@gluetun_httpproxy.0_host: {{ .Values.glueTunEnvHttpProxyHost }}
+        caddy.@gluetun_shadowsocks.0_host: {{ .Values.glueTunEnvShadowSocksHost }}
+        caddy.@plex.0_host: {{ .Values.plexEnvHost }}
+        caddy.@qbittorrent.0_host: {{ .Values.qBittorrentEnvHost }}
+        caddy.@xteve.0_host: {{ .Values.xteveEnvHost }}
+        caddy.0_reverse_proxy: '@gluetun_httpproxy {{ .Values.glueTunReverseProxyHost }}:8888'
+        caddy.1_reverse_proxy: '@gluetun_shadowsocks {{ .Values.glueTunReverseProxyHost }}:8388'
+        caddy.2_reverse_proxy: '@plex {{ .Values.plexEnvHostIp }}:32400'
+        caddy.3_reverse_proxy: '@qbittorrent {{ .Values.glueTunReverseProxyHost }}:8080'
+        caddy.4_reverse_proxy: '@xteve {{ .Values.glueTunReverseProxyHost }}:34400'
+      labels:
+        io.kompose.network/gluetun: "true"
+        io.kompose.service: gluetun
+    spec:
+      containers:
+        - env:
+            - name: DNS_ADDRESS
+              value: {{ .Values.glueTunEnvWireGuardDnsAddress }}
+            - name: HTTPPROXY
+              value: "on"
+            - name: HTTPPROXY_PASSWORD
+              value: {{ .Values.glueTunEnvHttpProxyPassword }}
+            - name: HTTPPROXY_USER
+              value: {{ .Values.glueTunEnvHttpProxyUser }}
+            - name: SHADOWSOCKS
+              value: "on"
+            - name: SHADOWSOCKS_PASSWORD
+              value: {{ .Values.glueTunEnvShadowSocksPassword }}
+            - name: TZ
+              value: {{ .Values.envTimeZone }}
+            - name: VPN_ENDPOINT_IP
+              value: {{ .Values.glueTunEnvWireGuardEndpointIp }}
+            - name: VPN_ENDPOINT_PORT
+              value: {{ .Values.glueTunEnvWireGuardEndpointPort }}
+            - name: VPN_SERVICE_PROVIDER
+              value: custom
+            - name: VPN_TYPE
+              value: wireguard
+            - name: WIREGUARD_ADDRESSES
+              value: {{ .Values.glueTunEnvWireGuardAddress }}
+            - name: WIREGUARD_PRIVATE_KEY
+              value: {{ .Values.glueTunEnvWireGuardPrivateKey }}
+            - name: WIREGUARD_PUBLIC_KEY
+              value: {{ .Values.glueTunEnvWireGuardPublicKey }}
+          image: qmcgaw/gluetun
+          name: gluetun
+          ports:
+            - containerPort: 8000
+            - containerPort: 8080
+            - containerPort: 8388
+            - containerPort: 8388
+              protocol: UDP
+            - containerPort: 8888
+            - containerPort: 34400
+          resources: {}
+          securityContext:
+            capabilities:
+              add:
+                - NET_ADMIN
+          volumeMounts:
+            - mountPath: /var/run/docker.sock
+              name: gluetun-vol0
+              readOnly: true
+            - mountPath: /gluetun
+              name: gluetun-vol1
+      restartPolicy: Always
+      volumes:
+        - name: gluetun-vol0
+          nfs:
+            server: {{ .Values.hostNfsServerAddress }}
+            path: {{ .Values.hostBasePersistPath }}/sys/var/run/docker.sock
+            readOnly: true
+        - name: gluetun-vol1
+          nfs:
+            server: {{ .Values.hostNfsServerAddress }}
+            path: {{ .Values.hostBasePersistPath }}/gluetun

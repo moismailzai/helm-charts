@@ -1,0 +1,38 @@
+caddyEnvHost: gluetun_httpproxy.ismailzai.local, gluetun_shadowsocks.ismailzai.local, plex.ismailzai.local, qbittorrent.ismailzai.local, xteve.ismailzai.local
+envTimeZone: America/Vancouver
+glueTunEnvHttpProxyHost: gluetun_httpproxy.ismailzai.local
+glueTunEnvHttpProxyPassword:
+glueTunEnvHttpProxyUser: gluetun
+glueTunEnvShadowSocksHost: gluetun_shadowsocks.ismailzai.local
+glueTunEnvShadowSocksPassword:
+glueTunEnvWireGuardAddress:
+glueTunEnvWireGuardDnsAddress:
+glueTunEnvWireGuardEndpointIp:
+glueTunEnvWireGuardEndpointPort: "51820"
+glueTunEnvWireGuardPrivateKey:
+glueTunEnvWireGuardPublicKey:
+glueTunNetworkName: gluetun
+glueTunReverseProxyHost: localhost
+hostBasePersistPath: /mnt/tank/persist
+hostBasePublicPath: /mnt/tank/public
+hostDockerSockBasePersistPath: /mnt/tank/persist
+hostDockerSockLocation: /mnt/tank/persist/sys/var/run/docker.sock
+hostNetworkName: host
+hostNfsServerAddress:
+hostTempPath: /dev/shm
+livenessProbeCommand: curl
+livenessProbePeriodSeconds: 90
+livenessProbeTimeoutSeconds: 2
+livenessProbeUrl: http://localhost:8000
+plexEnvClaim:
+plexEnvCudaPkgVersion: 10-0=10.0.130-1
+plexEnvCudaVersion: 10.0.130
+plexEnvHost: plex.ismailzai.local
+plexEnvHostIp:
+plexEnvLdLibraryPath: /usr/lib/nvidia/:/usr/local/nvidia/lib
+plexEnvNvidiaDriverCapabilities: compute,video,utility
+plexEnvNvidiaRequireCuda: '"cuda>=10.0 brand=tesla,driver>=384,driver<385 brand=tesla,driver>=410,driver<411"'
+plexEnvNvidiaVisibleDevices: all
+plexEnvPath: /usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+qBittorrentEnvHost: qbittorrent.ismailzai.local
+xteveEnvHost: xteve.ismailzai.local

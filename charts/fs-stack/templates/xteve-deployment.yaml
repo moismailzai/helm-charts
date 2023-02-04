@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    autoheal: "true"
+  labels:
+    io.kompose.service: xteve
+  name: xteve
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: xteve
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        autoheal: "true"
+      labels:
+        io.kompose.service: xteve
+    spec:
+      containers:
+        - env:
+            - name: TZ
+              value: {{ .Values.envTimeZone }}
+          image: dnsforge/xteve
+          livenessProbe:
+            exec:
+              command:
+                -  {{ .Values.livenessProbeCommand }}
+                - {{ .Values.livenessProbeUrl }}
+            failureThreshold: 1
+            periodSeconds: {{ .Values.livenessProbePeriodSeconds }}
+            timeoutSeconds: {{ .Values.livenessProbeTimeoutSeconds }}
+          name: xteve
+          resources: {}
+          volumeMounts:
+            - mountPath: /home/xteve/conf
+              name: xteve-vol0
+            - mountPath: /home/xteve/guide2go/conf
+              name: xteve-vol1
+            - mountPath: /tmp/xteve
+              name: xteve-vol2
+      restartPolicy: Always
+      volumes:
+        - name: xteve-vol0
+          nfs:
+            server: {{ .Values.hostNfsServerAddress }}
+            path: {{ .Values.hostBasePersistPath }}/xteve/homeXteveConf
+        - name: xteve-vol1
+          nfs:
+            server: {{ .Values.hostNfsServerAddress }}
+            path: {{ .Values.hostBasePersistPath }}/xteve/homeXteveGuide2goConf
+        - name: xteve-vol2
+          nfs:
+            server: {{ .Values.hostNfsServerAddress }}
+            path: {{ .Values.hostBasePersistPath }}/xteve/tmpXsteve
